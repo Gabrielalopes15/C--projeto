@@ -1,6 +1,9 @@
 #include<string.h>
 #define MAX_TAM 100     // Define um tamanho máximo para os campos de texto
 
+#ifndef MAIN_H
+#define MAIN_H
+
 // Definição de uma estrutura que representa um chamado
 typedef struct {
     int id;                // ID do chamado
