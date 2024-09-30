@@ -107,17 +107,17 @@ void registrarChamado(Chamado* chamado, int id) {
     chamado->nome[strcspn(chamado->nome, "\n")] = '\0'; // Remove a nova linha gerada pelo `fgets`
     limpa();
 
-    printf("\tDigite o telefone do cliente:\n\n\t ");
+    printf("\n\n\tDigite o telefone do cliente:\n\n\t ");
     fgets(chamado->telefone, MAX_TAM, stdin);  // Lê o telefone do cliente
     chamado->telefone[strcspn(chamado->telefone, "\n")] = '\0'; // Remove a nova linha
     limpa();
 
-    printf("\tDigite o email do cliente:\n\n\t ");
+    printf("\n\n\tDigite o email do cliente:\n\n\t ");
     fgets(chamado->email, MAX_TAM, stdin);  // Lê o email do cliente
     chamado->email[strcspn(chamado->email, "\n")] = '\0'; // Remove a nova linha
     limpa();
 
-    printf("\tDigite o texto do chamado:\n\n\t ");
+    printf("\n\n\tDigite o texto do chamado:\n\n\t ");
     fgets(chamado->texto, MAX_TAM, stdin);  // Lê a descrição do chamado
     chamado->texto[strcspn(chamado->texto, "\n")] = '\0'; // Remove a nova linha
     limpa();
@@ -161,7 +161,11 @@ void consultarChamadoPorID(Chamado** chamados, int numChamados, int id) {
         }
     }
     // Se o ID não for encontrado, informa que o chamado não foi achado
-    printf("Chamado com ID %d não encontrado.\n", id);
+            setColor(4,0);
+        printf("\n\n\t\t ___________________________________________________________________________________________\n");
+            printf("\t\t|                          Chamado com ID %d não encontrado.                                |\n", id);
+            printf("\t\t|___________________________________________________________________________________________|\n");
+            setColor(7,0);
 }
 
 
@@ -184,7 +188,11 @@ void atualizarChamado(Chamado** chamados, int numChamados, int id) {
         }
     }
     // Se o ID não for encontrado, informa que o chamado não foi achado
-    printf("Chamado com ID %d não encontrado.\n", id);
+    setColor(4,0);
+        printf("\n\n\t\t ___________________________________________________________________________________________\n");
+            printf("\t\t|                          Chamado com ID %d não encontrado.                                |\n", id);
+            printf("\t\t|___________________________________________________________________________________________|\n");
+            setColor(7,0);
 }
 
 // Função para listar chamados por status
