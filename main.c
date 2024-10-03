@@ -64,17 +64,19 @@ void bemvindo(void)
 void carregando (void){
     int i;
     for(i = 0; i < 2; i++){
-        setColor(9,15);
+        setColor(9,0);
         printf("\n\n\t _______________\n");
         printf("\t| Carregando.   |\n");
         printf("\t|_______________|\n");
         sleep(1);
         limpa();
+        setColor(9,0);
         printf("\n\n\t _______________\n");
         printf("\t| Carregando..  |\n");
         printf("\t|_______________|\n");
         sleep(1);
         limpa();
+        setColor(9,0);
         printf("\n\n\t _______________\n");
         printf("\t| Carregando... |\n");
         printf("\t|_______________|\n");
@@ -121,6 +123,7 @@ void registrarChamado(Chamado* chamado, int id) {
     fgets(chamado->texto, MAX_TAM, stdin);  // Lê a descrição do chamado
     chamado->texto[strcspn(chamado->texto, "\n")] = '\0'; // Remove a nova linha
     limpa();
+
 }
 
 // Função para exibir as informações de um chamado
@@ -303,6 +306,7 @@ int main (){
                     registrarChamado(chamados[numChamados], id);
                     // Exibe o chamado registrado
                     limpa();
+                    carregando();
                     exibirChamado(chamados[numChamados]);
 
                     numChamados++; // Incrementa o número de chamados registrados
