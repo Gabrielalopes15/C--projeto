@@ -2,9 +2,9 @@
 #include <stdlib.h>     // Biblioteca para funções de alocação de memória e controle do sistema
 #include <string.h>     // Biblioteca para manipulação de strings
 #include <time.h>       // Biblioteca para manipulação de tempo
-#include <locale.h>      //Biblioteca para reconhecer pontuação em portugues.
-#include <unistd.h>
-#include <windows.h> //Biblioteca para mudar cor do texto
+#include <locale.h>     //Biblioteca para reconhecer pontuação em portugues.
+#include <ctype.h>      //Biblioteca para verificar os numeros e caracteres
+#include <windows.h>    //Biblioteca para mudar cor do texto
 
 #include "main.h"
 
@@ -26,7 +26,7 @@ void setColor(int textColor, int bgColor) {
 }
 
 //Imprime o nome da empresa e horas
-void imprime_cabec(void)
+void imprime_cabec()
 {
         // Exibe o horário atual
     time_t tempo;
@@ -46,7 +46,7 @@ void imprime_cabec(void)
 
 
 //Imprime uma imagem de bem vindo
-void bemvindo(void)
+void bemvindo()
 {
     // Exibe uma mensagem de boas-vindas em arte de texto
     setColor(1, 0); // 7 = cinza claro
@@ -61,25 +61,25 @@ void bemvindo(void)
 }
 
 //Função para exibir tela de carregando.
-void carregando (void){
+void carregando (){
     int i;
     for(i = 0; i < 2; i++){
         setColor(9,0);
-        printf("\n\n\t _______________\n");
-        printf("\t| Carregando.   |\n");
-        printf("\t|_______________|\n");
+        printf("\n\n\n\n\t\t\t _______________\n");
+        printf("\t\t\t| Carregando.   |\n");
+        printf("\t\t\t|_______________|\n");
         sleep(1);
         limpa();
         setColor(9,0);
-        printf("\n\n\t _______________\n");
-        printf("\t| Carregando..  |\n");
-        printf("\t|_______________|\n");
+        printf("\n\n\n\n\t\t\t _______________\n");
+        printf("\t\t\t| Carregando..  |\n");
+        printf("\t\t\t|_______________|\n");
         sleep(1);
         limpa();
         setColor(9,0);
-        printf("\n\n\t _______________\n");
-        printf("\t| Carregando... |\n");
-        printf("\t|_______________|\n");
+        printf("\n\n\n\n\t\t\t _______________\n");
+        printf("\t\t\t| Carregando... |\n");
+        printf("\t\t\t|_______________|\n");
         sleep(1);
         limpa();
         setColor(7,0);
@@ -96,6 +96,31 @@ void limpa(void)
     return;
 }
 
+// Função para validar o telefone
+int validarTelefone(const char *telefone) {
+    int length = strlen(telefone);
+
+// Verifica se o comprimento está entre 10 e 11
+int validarTelefone(const char *telefone); {
+    int length = strlen(telefone);
+
+    // Verifica se o comprimento está entre 10 e 11
+    if (length < 10 || length > 11) {
+        return 0; // Telefone inválido
+    }
+
+    // Verifica se todos os caracteres são dígitos
+    for (int i = 0; i < length; i++) {
+        if (!isdigit(telefone[i])) {
+            return 0; // Telefone inválido
+        }
+    }
+}
+    return 1; // Telefone válido
+}
+
+
+
 // Função para registrar um novo chamado
 void registrarChamado(Chamado* chamado, int id) {
     chamado->id = id;   // Atribui o ID ao chamado
@@ -109,9 +134,21 @@ void registrarChamado(Chamado* chamado, int id) {
     chamado->nome[strcspn(chamado->nome, "\n")] = '\0'; // Remove a nova linha gerada pelo `fgets`
     limpa();
 
-    printf("\n\n\tDigite o telefone do cliente:\n\n\t ");
-    fgets(chamado->telefone, MAX_TAM, stdin);  // Lê o telefone do cliente
-    chamado->telefone[strcspn(chamado->telefone, "\n")] = '\0'; // Remove a nova linha
+    int telefoneValido = 0;
+    while (!telefoneValido) {
+        printf("\n\n\tDigite o telefone do cliente:\n\n\t ");
+        fgets(chamado->telefone, MAX_TAM, stdin);
+        chamado->telefone[strcspn(chamado->telefone, "\n")] = '\0';
+        limpa();
+
+        if (validarTelefone(chamado->telefone)) {
+            telefoneValido = 1;
+        } else {
+            printf("\n\n\tTelefone inválido. Por favor, insira um número de telefone válido.\n");
+        }
+    }
+
+    chamado->telefone[strcspn(chamado->telefone, "\n")] = '\0'; // Remove a nova linha gerada pelo `fgets`
     limpa();
 
     printf("\n\n\tDigite o email do cliente:\n\n\t ");
@@ -237,14 +274,14 @@ void login_tecnico(){
 }
 
 //Imprime o menu do tecnico
-void menu_tecnico (){
+void menu_tecnico (void){
   // Menu da área técnica
-        printf("\n----- Área Técnica -----\n");
-        printf("Escolha a opção desejada:\n");
-        printf("1. Consultar chamados ABERTOS\n");
-        printf("2. Consultar chamados FECHADOS\n");
-        printf("3. Atualizar chamado\n");
-        printf("4. Voltar ao menu principal\n");
+        printf("\n\t\t\t----- Área Técnica -----\n");
+        printf("\t\t\tEscolha a opção desejada:\n");
+        printf("\t\t\t1. Consultar chamados ABERTOS\n");
+        printf("\t\t\t2. Consultar chamados FECHADOS\n");
+        printf("\t\t\t3. Atualizar chamado\n");
+        printf("\t\t\t4. Voltar ao menu principal\n");
         scanf("%d", &opcao_tecnica);
         return;
 }
