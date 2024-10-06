@@ -5,8 +5,8 @@
 #include <locale.h>     //Biblioteca para reconhecer pontuação em portugues.
 #include <ctype.h>      //Biblioteca para verificar os numeros e caracteres
 #include <windows.h>    //Biblioteca para mudar cor do texto
-#include <regex.h>      //Biblioteca para manipulação de expressões regulares
 
+#include "email_sender.h"
 #include "main.h"
 
 
@@ -120,6 +120,27 @@ int validarTelefone(const char *telefone); {
     return 1; // Telefone válido
 }
 
+int validarEmail(const char *email) {
+    regex_t regex;
+    int reti;
+
+    // Expressão regular para validar email
+    reti = regcomp(&regex, "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", REG_EXTENDED);
+    if (reti) {
+        fprintf(stderr, "Não foi possível compilar regex\n");
+        return 0;
+    }
+
+    // Executa a regex
+    reti = regexec(&regex, email, 0, NULL, 0);
+    regfree(&regex);
+
+    if (!reti) {
+        return 1; // Email válido
+    } else {
+        return 0; // Email inválido
+    }
+}
 
 
 // Função para registrar um novo chamado
@@ -148,29 +169,6 @@ void registrarChamado(Chamado* chamado, int id) {
             printf("\n\n\tTelefone inválido. Por favor, insira um número de telefone válido.\n");
         }
     }
-
-    int validarEmail(const char *email) {
-    regex_t regex;
-    int reti;
-
-    // Expressão regular para validar email
-    reti = regcomp(&regex, "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", REG_EXTENDED);
-    if (reti) {
-        fprintf(stderr, "Não foi possível compilar regex\n");
-        return 0;
-    }
-
-    // Executa a regex
-    reti = regexec(&regex, email, 0, NULL, 0);
-    regfree(&regex);
-
-    if (!reti) {
-        return 1; // Email válido
-    } else {
-        return 0; // Email inválido
-    }
-}
-
     chamado->telefone[strcspn(chamado->telefone, "\n")] = '\0'; // Remove a nova linha gerada pelo `fgets`
     limpa();
 
@@ -187,7 +185,9 @@ void registrarChamado(Chamado* chamado, int id) {
             printf("\n\n\tEmail inválido. Por favor, insira um email válido.\n");
         }
     }
+    chamado->email[strcspn(chamado->email, "\n")] = '\0'; // Remove a nova linha gerada pelo `fgets`
     limpa();
+    
 
     printf("\n\n\tDigite o texto do chamado:\n\n\t ");
     fgets(chamado->texto, MAX_TAM, stdin);  // Lê a descrição do chamado
