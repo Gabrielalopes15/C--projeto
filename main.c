@@ -227,6 +227,7 @@ void login_tecnico(){
     printf("Digite a senha para a área técnica: ");
     scanf("%d", &senha);
     if (senha == senha_correta) {
+        limpa();
         menu_tecnico();
     }else{
         printf("Senha incorreta\n");
@@ -329,7 +330,7 @@ int main (){
 
             case 3:
                 // Área técnica (implementar conforme necessário)
-                printf("Área técnica ainda não implementada.\n");
+                login_tecnico();
                 break;
 
             case 4:
