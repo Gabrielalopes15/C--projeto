@@ -6,7 +6,7 @@
 #include <ctype.h>      //Biblioteca para verificar os numeros e caracteres
 #include <windows.h>    //Biblioteca para mudar cor do texto
 
-#include "email_sender.h"
+//#include "email_sender.h"
 #include "main.h"
 
 
@@ -120,7 +120,7 @@ int validarTelefone(const char *telefone); {
     return 1; // Telefone válido
 }
 
-int validarEmail(const char *email) {
+/*int validarEmail(const char *email) {
     regex_t regex;
     int reti;
 
@@ -140,7 +140,7 @@ int validarEmail(const char *email) {
     } else {
         return 0; // Email inválido
     }
-}
+} */
 
 
 // Função para registrar um novo chamado
@@ -172,7 +172,7 @@ void registrarChamado(Chamado* chamado, int id) {
     chamado->telefone[strcspn(chamado->telefone, "\n")] = '\0'; // Remove a nova linha gerada pelo `fgets`
     limpa();
 
-    int emailValido = 0;
+    /*int emailValido = 0;
     while (!emailValido) {
         printf("\n\n\tDigite o email do cliente:\n\n\t ");
         fgets(chamado->email, MAX_TAM, stdin);
@@ -186,7 +186,7 @@ void registrarChamado(Chamado* chamado, int id) {
         }
     }
     chamado->email[strcspn(chamado->email, "\n")] = '\0'; // Remove a nova linha gerada pelo `fgets`
-    limpa();
+    limpa(); */
     
 
     printf("\n\n\tDigite o texto do chamado:\n\n\t ");
