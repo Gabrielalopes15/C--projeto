@@ -5,8 +5,7 @@
 #include <locale.h>     //Biblioteca para reconhecer pontuação em portugues.
 #include <ctype.h>      //Biblioteca para verificar os numeros e caracteres
 #include <windows.h>    //Biblioteca para mudar cor do texto
-
-//#include "email_sender.h"
+#include <curl.curl.h>  //Biblioteca para enviar email
 #include "main.h"
 
 
@@ -120,7 +119,7 @@ int validarTelefone(const char *telefone); {
     return 1; // Telefone válido
 }
 
-/*int validarEmail(const char *email) {
+int validarEmail(const char *email) {
     regex_t regex;
     int reti;
 
@@ -140,7 +139,7 @@ int validarTelefone(const char *telefone); {
     } else {
         return 0; // Email inválido
     }
-} */
+} 
 
 
 // Função para registrar um novo chamado
@@ -149,7 +148,7 @@ void registrarChamado(Chamado* chamado, int id) {
 
     // Atribui o Status ao chamado como "ABERTO"
     strncpy(chamado->status, "ABERTO", MAX_TAM);
-    chamado->resolucao[0] = '\0'; // Inicializa a resolução como uma string vazia
+    chamado->resolucao = '\0'; // Inicializa a resolução como uma string vazia
 
     printf("\n\n\tDigite o nome do cliente:\n\n\t ");
     fgets(chamado->nome, MAX_TAM, stdin);   // Lê o nome do cliente
@@ -169,10 +168,13 @@ void registrarChamado(Chamado* chamado, int id) {
             printf("\n\n\tTelefone inválido. Por favor, insira um número de telefone válido.\n");
         }
     }
-    chamado->telefone[strcspn(chamado->telefone, "\n")] = '\0'; // Remove a nova linha gerada pelo `fgets`
+
+    printf("\n\n\tDigite o texto do chamado:\n\n\t ");
+    fgets(chamado->texto, MAX_TAM, stdin);  // Lê a descrição do chamado
+    chamado->texto[strcspn(chamado->texto, "\n")] = '\0'; // Remove a nova linha
     limpa();
 
-    /*int emailValido = 0;
+    int emailValido = 0;
     while (!emailValido) {
         printf("\n\n\tDigite o email do cliente:\n\n\t ");
         fgets(chamado->email, MAX_TAM, stdin);
@@ -185,15 +187,57 @@ void registrarChamado(Chamado* chamado, int id) {
             printf("\n\n\tEmail inválido. Por favor, insira um email válido.\n");
         }
     }
-    chamado->email[strcspn(chamado->email, "\n")] = '\0'; // Remove a nova linha gerada pelo `fgets`
-    limpa(); */
-    
+}
 
-    printf("\n\n\tDigite o texto do chamado:\n\n\t ");
-    fgets(chamado->texto, MAX_TAM, stdin);  // Lê a descrição do chamado
-    chamado->texto[strcspn(chamado->texto, "\n")] = '\0'; // Remove a nova linha
-    limpa();
+size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp) {
+    Chamado *chamado = (Chamado *)userp;
+    static int sent = 0;
 
+    if (sent) {
+        return 0; // All data has been sent
+    }
+
+    // Formatar a mensagem com nome, telefone e texto do chamado
+    char mensagem[MAX_TAM * 3];
+    snprintf(mensagem, sizeof(mensagem), "Nome: %s\nTelefone: %s\nMensagem: %s\n",
+             chamado->nome, chamado->telefone, chamado->texto);
+
+    size_t len = strlen(mensagem);
+    memcpy(ptr, mensagem, len);
+    sent = 1;
+
+    return len;
+}
+
+void enviarEmail(Chamado *chamado) {
+    CURL *curl;
+    CURLcode res;
+    struct curl_slist *recipients = NULL;
+
+    curl = curl_easy_init();
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_USERNAME, "gabylopes2000@gmail.com");
+        curl_easy_setopt(curl, CURLOPT_PASSWORD, "feas vmrv suyt npdj");
+        curl_easy_setopt(curl, CURLOPT_URL, "smtp://smtp.gmail.com:587");
+        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+        curl_easy_setopt(curl, CURLOPT_MAIL_FROM, "<gabylopes2000@gmail.com>");
+
+        recipients = curl_slist_append(recipients, "<gabylopes2000@gmail.com>");
+        curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+
+        curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+        curl_easy_setopt(curl, CURLOPT_READDATA, chamado);
+        curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+
+        res = curl_easy_perform(curl);
+
+        if (res != CURLE_OK) {
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        }
+
+        curl_slist_free_all(recipients);
+        curl_easy_cleanup(curl);
+    }
 }
 
 // Função para exibir as informações de um chamado
