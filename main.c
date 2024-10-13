@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <conio.h>      // Para usar getch()
 #include <windows.h>    //Biblioteca para mudar cor do texto
-#include <sqlite3.h>    //Biblioteca para usar banco de dados SQLITE
 
 #include "main.h"
 
@@ -358,7 +357,8 @@ void listarChamadosPorStatus(Chamado** chamados, int numChamados, const char* st
         }
     }
     if (!encontrado) {
-        printf("Nenhum chamado com status '%s' encontrado.\n", statusDesejado);
+        limpa();
+        printf("\t\t\tNenhum chamado com status '%s' encontrado.\n", statusDesejado);
     }
 }
 
@@ -413,7 +413,6 @@ void menu_tecnico (Chamado** chamados, int numChamados){
             case 4: {
                 // Voltar ao menu principal
                 limpa();
-                saindo();
                 return;
             }
             default:
