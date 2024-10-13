@@ -22,6 +22,18 @@ int ticket; //Armazena ticket do menu principal.
 
 //Funções
 
+//Função para escolher imprimir ou não
+void escolher_imprimir() {
+    char resposta;
+    printf("\n\n\t\t\tDeseja imprimir o arquivo? (s/n):\n\n\t\t\t ");
+    scanf(" %c", &resposta);
+
+    if (resposta == 's' || resposta == 'S') {
+        imprimir_arquivo("chamado.txt");
+    } else {
+        printf("Impressão cancelada.\n");
+    }
+}
 
 
 // Função para imprimir um arquivo
@@ -234,7 +246,6 @@ void registrarChamado(Chamado* chamado, int id) {
     chamado->texto[strcspn(chamado->texto, "\n")] = '\0'; // Remove a nova linha
     limpa();
     salvar_chamado(chamado); //Salva os detalhes do chamado
-    imprimir_arquivo("chamado.txt");
     carregando();
 
 }
@@ -522,7 +533,8 @@ int main (){
 
                     numChamados++; // Incrementa o número de chamados registrados
                     id++;          // Incrementa o ID do próximo chamado
-
+                    escolher_imprimir();
+                    limpa();
                     printf("\n\n\t\t\t\tDeseja abrir outro ticket? (sim/nao)\n\n\t\t\t\t");
                     scanf("%s", sair);
                 } while (strcmp(sair, "sim") == 0);
