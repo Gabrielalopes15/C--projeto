@@ -2,10 +2,11 @@
 #include <stdlib.h>     // Biblioteca para funções de alocação de memória e controle do sistema
 #include <string.h>     // Biblioteca para manipulação de strings
 #include <time.h>       // Biblioteca para manipulação de tempo
-#include <locale.h>      //Biblioteca para reconhecer pontuação em portugues.
+#include <locale.h>     //Biblioteca para reconhecer pontuação em portugues.
 #include <unistd.h>
-#include <conio.h>  // Para usar getch()
-#include <windows.h> //Biblioteca para mudar cor do texto
+#include <conio.h>      // Para usar getch()
+#include <windows.h>    //Biblioteca para mudar cor do texto
+#include <sqlite3.h>    //Biblioteca para usar banco de dados SQLITE
 
 #include "main.h"
 
