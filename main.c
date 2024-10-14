@@ -224,7 +224,7 @@ void registrarChamado(Chamado* chamado, int id) {
 
     int telefoneValido = 0;
     while (!telefoneValido) {
-        printf("\n\t\t\tDigite o telefone do cliente: exemplo: ddd 9nnnnnnn\n\t\t\t ");
+        printf("\n\t\t\tDigite o telefone do cliente: exemplo: dd9nnnnnnn\n\t\t\t ");
         fgets(chamado->telefone, MAX_TAM, stdin);
         chamado->telefone[strcspn(chamado->telefone, "\n\t\t\t")] = '\0';
         limpa();
