@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <conio.h>      // Para usar getch()
 #include <windows.h>    //Biblioteca para mudar cor do texto
-
+#include <sqlite3.h>    //Biblioteca para banco de dados
 #include "main.h"
 
 
@@ -135,19 +135,19 @@ void saindo (){
     int i;
     for(i = 0; i < 2; i++){
         //setColor(9,15);
-        printf("\n\n\t\t\t _______________\n");
-        printf("\t\t\t| Saindo.       |\n");
-        printf("\t\t\t|_______________|\n");
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Saindo.       |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
         sleep(1);
         limpa();
-        printf("\n\n\t\t\t _______________\n");
-        printf("\t\t\t| Saindo..      |\n");
-        printf("\t\t\t|_______________|\n");
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Saindo..      |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
         sleep(1);
         limpa();
-        printf("\n\n\t\t\t _______________\n");
-        printf("\t\t\t| Saindo...     |\n");
-        printf("\t\t\t|_______________|\n");
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Saindo...     |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
         sleep(1);
         limpa();
         setColor(7,0);
@@ -207,6 +207,8 @@ int validarTelefone(const char *telefone); {
     return 1; // Telefone válido
 }
 
+
+
 // Função para registrar um novo chamado
 void registrarChamado(Chamado* chamado, int id) {
     printf("\n\t\t\tRegistrando chamado com ID: %d\n", id);
@@ -224,7 +226,7 @@ void registrarChamado(Chamado* chamado, int id) {
 
     int telefoneValido = 0;
     while (!telefoneValido) {
-        printf("\n\t\t\tDigite o telefone do cliente: exemplo: dd9nnnnnnn\n\t\t\t ");
+        printf("\n\t\t\tDigite o telefone do cliente: exemplo: dd9nnnnnnnn\n\t\t\t ");
         fgets(chamado->telefone, MAX_TAM, stdin);
         chamado->telefone[strcspn(chamado->telefone, "\n\t\t\t")] = '\0';
         limpa();
@@ -317,25 +319,25 @@ void atualizarChamado(Chamado** chamados, int numChamados, int id) {
     for (int i = 0; i < numChamados; i++) {
         if (chamados[i]->id == id) {    // Verifica se o ID corresponde
             carregando();
-            printf("Chamado encontrado.\n");
+            printf("\n\n\t\t\tChamado encontrado.\n");
 
             // Lê o novo status
-            printf("Digite o novo status (ex: 'FECHADO', 'PENDENTE'): ");
+            printf("\n\n\t\t\tDigite o novo status (ex: 'FECHADO', 'PENDENTE'):\n\t\t\t ");
             fgets(chamados[i]->status, MAX_TAM, stdin);
             chamados[i]->status[strcspn(chamados[i]->status, "\n")] = '\0'; // Remove a nova linha
 
             // Lê a resolução do chamado
-            printf("Digite a resolução do chamado: ");
+            printf("\n\n\t\t\tDigite a resolução do chamado:\n\t\t\t ");
             fgets(chamados[i]->resolucao, MAX_TAM, stdin);
             chamados[i]->resolucao[strcspn(chamados[i]->resolucao, "\n")] = '\0'; // Remove a nova linha
 
             // Lê o valor do serviço
-            printf("Digite o valor do serviço: ");
+            printf("\n\n\t\t\tDigite o valor do serviço:\n\t\t\t ");
             fgets(chamados[i]->valor, MAX_TAM, stdin);
             chamados[i]->valor[strcspn(chamados[i]->valor, "\n")] = '\0'; // Remove a nova linha
             limpa();
             carregando();
-            printf("Chamado atualizado com sucesso.\n");
+            printf("\n\n\t\t\tChamado atualizado com sucesso.\n");
             return;
         }
     }
@@ -383,6 +385,7 @@ void menu_tecnico (Chamado** chamados, int numChamados){
             case 1:
                 // Consultar chamados ABERTOS
                 if (numChamados > 0) {
+                    limpa();
                     listarChamadosPorStatus(chamados, numChamados, "ABERTO");
                 } else {
                     limpa();
@@ -393,6 +396,7 @@ void menu_tecnico (Chamado** chamados, int numChamados){
             case 2:
                 // Consultar chamados FECHADOS
                 if (numChamados > 0) {
+                    limpa();
                     listarChamadosPorStatus(chamados, numChamados, "FECHADO");
                 } else {
                     limpa();
@@ -469,6 +473,16 @@ void login_tecnico(Chamado** chamados, int numChamados, int consultaID){
 }
 
 
+void enviar_wpp(Chamado* chamado) {
+    char url[512];
+    snprintf(url, sizeof(url), "start \"\" \"https://wa.me/55034999021465?text=ID:%d%%20Nome:%s%%20Telefone:%s%%20Email:%s%%20Texto:%s\"",
+             chamado->id, chamado->nome, chamado->telefone, chamado->email, chamado->texto);
+    system(url);
+}
+
+
+
+
 // Exibe o menu principal
 void imprime_menu() {
     printf("\t\t\t\tEscolha a opção desejada:\n");
@@ -480,7 +494,18 @@ void imprime_menu() {
 }
 
 //codigo fonte
-int main (){
+int main (int argc, char* argv[]){
+
+        sqlite3 *db;
+        char *zErrMsg = 0;
+        int rc;
+        rc = sqlite3_open("teste.db", &db);
+
+        if (rc){
+            printf("ERRO");
+        }else{
+        printf("Conectado");
+        }
 
         setlocale(LC_ALL, "Portuguese");
 
@@ -492,8 +517,11 @@ int main (){
         int consultaID;              // Armazena o ID a ser consultado
         char sair[3];
 
+
+
         limpa();
         bemvindo();
+
 
     while (1) {
         printf("\n\n");
@@ -527,10 +555,11 @@ int main (){
 
                     // Registra o chamado
                     registrarChamado(chamados[numChamados], id);
+
                     // Exibe o chamado registrado
                     limpa();
                     exibirChamado(chamados[numChamados]);
-
+                    enviar_wpp(chamados[numChamados]);
                     numChamados++; // Incrementa o número de chamados registrados
                     id++;          // Incrementa o ID do próximo chamado
                     escolher_imprimir();
