@@ -7,46 +7,95 @@
 
 
 // Definições
-#define LINHA "\t\t\t=========================================================================\n"
-#define TRACO "\t\t\t|----------------------------------------------------------------------|\n"
+// Função para centralizar o texto
+void centralizeText(const char *text) {
+    int consoleWidth = getConsoleWidth();
+    int padding = (consoleWidth - strlen(text)) / 2;
+    for (int i = 0; i < padding; i++) printf(" ");
+    printf("%s\n", text);
+}
+
+// Definições centralizadas
+#define LINHA "=========================================================================             "
+#define TRACO "|----------------------------------------------------------------------                   |"
 
 
-//Função para mudar cor e fundo de texto.
+
+// Função para definir a cor do texto
 void setColor(int textColor, int bgColor) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, (bgColor << 4) | textColor);
 }
 
 
-//Imprime o nome da empresa e horas
-void imprime_cabec(void)
-{
-        // Exibe o horário atual
+// Função para obter a largura da tela do console
+int getConsoleWidth() {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    int columns;
+
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+
+    return columns;
+}
+
+
+// Função para abrir o console em tela cheia
+void abrirTelaCheia() {
+    HWND hwnd = GetConsoleWindow();
+    ShowWindow(hwnd, SW_MAXIMIZE);
+}
+
+
+// Função para imprimir o cabeçalho centralizado
+void imprime_cabec(void) {
+
+    // Exibe o horário atual
     time_t tempo;
     time(&tempo);
     struct tm *tempo0 = localtime(&tempo);
 
-    setColor(15, 1); // 1 = azul, 15 = fundo branco
-    printf(LINHA);
-    printf("\t\t\t|  **********              Sistema de Ticketing             **********  |\n");
-    printf("\t\t\t|                          %02d:%02d                                        |\n", tempo0->tm_hour, tempo0->tm_min);
-    printf(LINHA);
+    int consoleWidth = getConsoleWidth();
+    int padding = (consoleWidth - 70) / 2; // 70 é a largura do texto
+
+    setColor(15, 13); // 1 = azul, 15 = fundo branco
+    printf("\n\n");
+    for (int i = 0; i < padding; i++) printf(" ");
+    printf("----------------------------------------------------------------------                                                \n");
+    for (int i = 0; i < padding; i++) printf(" ");
+    printf("|  **********              Sistema de Ticketing          **********  |                                                \n");
+    for (int i = 0; i < padding; i++) printf(" ");
+    printf("|                          %02d:%02d                                     |                                                \n", tempo0->tm_hour, tempo0->tm_min);
+    for (int i = 0; i < padding; i++) printf(" ");
+    printf("----------------------------------------------------------------------                                                \n");
     setColor(7, 0); // Volta as cores ao padrão windows.
     return;
 }
 
 
-// Função para imprimir o menu
+// Função para imprimir o menu centralizado
 void imprime_menu() {
-    printf("\n\t\t\t\t\t------- Menu Principal -------\n");
-    printf("\t\t\t\t\t1. Cadastrar Cliente\n");
-    printf("\t\t\t\t\t2. Cadastrar Ticket por CPF\n");
-    printf("\t\t\t\t\t3. Alterar Ticket\n");
-    printf("\t\t\t\t\t4. Consultar ticket\n");
-    printf("\t\t\t\t\t5. Dashboard\n");
-    printf("\t\t\t\t\t6. Sair\n");
-    printf("\t\t\t\t\t7. Sair\n");
-    printf("\t\t\t\t\tEscolha uma opção: ");
+    int consoleWidth = getConsoleWidth();
+    const char *menu_items[] = {
+        "------- Menu Principal -------",
+        "1. Cadastrar Cliente",
+        "2. Cadastrar Ticket por CPF",
+        "3. Alterar Ticket",
+        "4. Consultar ticket",
+        "5. Dashboard",
+        "6. Sair"
+    };
+    int num_items = sizeof(menu_items) / sizeof(menu_items[0]);
+
+    for (int i = 0; i < num_items; i++) {
+        int padding = (consoleWidth - strlen(menu_items[i])) / 2;
+        for (int j = 0; j < padding; j++) printf(" ");
+        printf("%s\n", menu_items[i]);
+    }
+
+    int padding = (consoleWidth - strlen("Escolha uma opção: ")) / 2;
+    for (int j = 0; j < padding; j++) printf(" ");
+    printf("Escolha uma opção: ");
 }
 
 //Limpa a tela.
@@ -57,23 +106,44 @@ void limpa(void)
     return;
 }
 
-
-//Imprime uma imagem de bem vindo
-void bemvindo()
+//Limpa a tela.
+void limpaTudo(void)
 {
-    // Exibe uma mensagem de boas-vindas em arte de texto
-    setColor(9, 0); // azul claro
-    printf("\n\t\t\t\tBBBB   EEEEE M   M      V   V  I  N   N DDDD   OOO  \n");
-    printf("\t\t\t\tB   B  E     MM MM      V   V  I  NN  N D   D O   O \n");
-    printf("\t\t\t\tBBBB   EEEE  M M M      V   V  I  N N N D   D O   O \n");
-    printf("\t\t\t\tB   B  E     M   M       V V   I  N  NN D   D O   O \n");
-    printf("\t\t\t\tBBBB   EEEEE M   M        V    I  N   N DDDD   OOO  \n\n");
-    printf("\n\t\t\t\t\t------- Bem vindo ao Ticketing  -------\n\n");
-    setColor(7, 0); // Volta as cores ao padrão windows.
-    setColor(13,0);  // 2 = azul claro
-    printf("\n\t\t\t\t Feito por: Carlos - Gabriela - Lucas - Leticia \n\n");
-    setColor(7, 0); // Volta as cores ao padrão windows.
+    system("cls");
+
     return;
+}
+
+
+// Função para imprimir a mensagem de boas-vindas centralizada
+void bemvindo() {
+    int consoleWidth = getConsoleWidth();
+    const char *welcome_message[] = {
+        "BBBB   EEEEE M   M      V   V  I  N   N DDDD   OOO  ",
+        "B   B  E     MM MM      V   V  I  NN  N D   D O   O ",
+        "BBBB   EEEE  M M M      V   V  I  N N N D   D O   O ",
+        "B   B  E     M   M       V V   I  N  NN D   D O   O ",
+        "BBBB   EEEEE M   M        V    I  N   N DDDD   OOO  ",
+        "------- Bem vindo ao Ticketing  -------",
+        "Feito por: Carlos - Gabriela - Lucas - Leticia"
+    };
+    int num_lines = sizeof(welcome_message) / sizeof(welcome_message[0]);
+
+    setColor(9, 0); // azul claro
+    for (int i = 0; i < 5; i++) {
+        int padding = (consoleWidth - strlen(welcome_message[i])) / 2;
+        for (int j = 0; j < padding; j++) printf(" ");
+        printf("%s\n", welcome_message[i]);
+    }
+    setColor(7, 0); // Volta as cores ao padrão windows.
+
+    setColor(13, 0); // rosa claro
+    for (int i = 5; i < num_lines; i++) {
+        int padding = (consoleWidth - strlen(welcome_message[i])) / 2;
+        for (int j = 0; j < padding; j++) printf(" ");
+        printf("%s\n", welcome_message[i]);
+    }
+    setColor(7, 0); // Volta as cores ao padrão windows.
 }
 
 
@@ -104,32 +174,35 @@ exit(0);
 }
 
 
-//Função para exibir tela de carregando.
-void carregando (void){
+// Função para exibir tela de carregando
+void carregando(void) {
     int i;
-    for(i = 0; i < 1; i++){
+    for (i = 0; i < 1; i++) {
         limpa();
-        //setColor(9,15);
-        printf("\n\n\t\t\t\t\t\t _______________\n");
-        printf("\t\t\t\t\t\t| Carregando.   |\n");
-        printf("\t\t\t\t\t\t|_______________|\n");
+        // setColor(9, 13);
+        printf("\n\n\n\n\n\n\n\n\n\n");
+        centralizeText(" _______________ ");
+        centralizeText("|  Carregando.  |");
+        centralizeText("|_______________|");
         sleep(1);
         limpa();
-        printf("\n\n\t\t\t\t\t\t _______________\n");
-        printf("\t\t\t\t\t\t| Carregando..  |\n");
-        printf("\t\t\t\t\t\t|_______________|\n");
+        printf("\n\n\n\n\n\n\n\n\n\n");
+        centralizeText(" _______________ ");
+        centralizeText("|  Carregando.. |");
+        centralizeText("|_______________|");
         sleep(1);
         limpa();
-        printf("\n\n\t\t\t\t\t\t _______________\n");
-        printf("\t\t\t\t\t\t| Carregando... |\n");
-        printf("\t\t\t\t\t\t|_______________|\n");
+        printf("\n\n\n\n\n\n\n\n\n\n");
+        centralizeText(" _______________ ");
+        centralizeText("|  Carregando...|");
+        centralizeText("|_______________|");
         sleep(1);
         limpa();
-        setColor(7,0);
+        setColor(7, 0);
     }
-return;
-
+    return;
 }
+
 
 
 //Função para criar grafico
@@ -156,7 +229,7 @@ void graficoChamados(sqlite3 *db) {
     int abertos = 0, fechados = 0, pendentes = 0;
 
     if (consultarStatusChamados(db, &abertos, &fechados, &pendentes) != SQLITE_OK) {
-        setColor(4,4);  // 4 = vermelho
+        setColor(4,0);  // 4 = vermelho
         printf("Erro ao obter os status dos chamados.\n");
         setColor(7, 0); // Volta as cores ao padrão windows.
         return;
@@ -186,23 +259,21 @@ void graficoChamados(sqlite3 *db) {
 }
 
 
+
+
 int main() {
+    abrirTelaCheia();
     setlocale(LC_ALL, "Portuguese");
-
     sqlite3 *db;
-
-    // Variáveis
     int ticket;
     char cpf[20], nome[100], tel[20];
     int id_cliente, id_ticket, valor;
     char relato[256], resolucao[256], status[50];
 
-    // Abre o banco de dados
     if (abrirBanco(&db) != SQLITE_OK) {
         return 1;
     }
 
-    // Cria as tabelas, se não existirem
     if (criarTabela(db) != SQLITE_OK) {
         sqlite3_close(db);
         return 1;
@@ -212,6 +283,7 @@ int main() {
     sleep(2);
 
     while (1) {
+        limpaTudo();
         printf("\n\n");
         imprime_cabec();
         imprime_menu();
@@ -222,60 +294,64 @@ int main() {
 
         switch (ticket) {
             case 1:
-                 // Cadastrar Cliente
-
                 // Cadastrar Cliente
                 printf("\n\t\t\tDigite o nome: ");
                 fgets(nome, sizeof(nome), stdin);
-                nome[strcspn(nome, "\n")] = 0; // Remover o caractere de nova linha
+                nome[strcspn(nome, "\n")] = 0;
 
                 printf("\n\t\t\tDigite o telefone: ");
                 fgets(tel, sizeof(tel), stdin);
-                tel[strcspn(tel, "\n")] = 0; // Remover o caractere de nova linha
+                tel[strcspn(tel, "\n")] = 0;
 
                 printf("\n\t\t\tDigite o CPF: ");
                 fgets(cpf, sizeof(cpf), stdin);
-                cpf[strcspn(cpf, "\n")] = 0; // Remover o caractere de nova linha
-
+                cpf[strcspn(cpf, "\n")] = 0;
+                carregando();
                 if (cadastrarCliente(db, nome, tel, cpf) != SQLITE_OK) {
-                  setColor(2, 0);
-                   printf("\n\t\t\tCliente cadastrado com sucesso.\n");
-                   setColor(7, 0); // Volta as cores ao padrão windows.
+                    setColor(2, 0);
+                    printf("\n\t\t\tCliente cadastrado com sucesso.\n");
+                    sleep(3);
+                    setColor(7, 0);
                 } else {
-                     setColor(4, 0);  // 4 = vermelho
+                    setColor(4, 0);
                     printf("\n\t\t\tErro ao cadastrar cliente.\n");
-                    setColor(7, 0); // Volta as cores ao padrão windows.
+                    setColor(7, 0);
                 }
+                limpaTudo();
                 break;
-                limpa();
-            case 2:
-                 // Consultar Cliente pelo CPF antes de Inserir Relato
 
+            case 2:
+                // Consultar Cliente pelo CPF antes de Inserir Relato
                 printf("\n\t\t\t\t\tDigite o CPF do cliente: ");
                 scanf("%19s", cpf);
 
                 if (consultarClientePorCPF(db, cpf, &id_cliente) == SQLITE_OK) {
                     printf("\n\t\t\t\t\tDigite o relato: ");
-                    getchar(); // Consumir o caractere de nova linha deixado pelo scanf
+                    getchar();
                     fgets(relato, sizeof(relato), stdin);
-                    relato[strcspn(relato, "\n")] = 0; // Remover o caractere de nova linha
+                    relato[strcspn(relato, "\n")] = 0;
 
                     if (inserirRelato(db, id_cliente, relato) != SQLITE_OK) {
-                        printf("\n\t\t\t\t\tErro ao inserir relato.\n");
-                    } else {
+                        setColor(2, 0);
                         printf("\n\t\t\t\t\tRelato inserido com sucesso.\n");
+                        setColor(7, 0);
+                    } else {
+                        setColor(4, 0);
+                        printf("\n\t\t\t\t\tErro ao inserir relato.\n");
+                        setColor(7, 0);
                     }
                 }
+
                 break;
+
             case 3:
                 // Alterar Chamado
-
                 printf("\n\t\t\t\t\tDigite o ID do ticket: ");
                 scanf("%d", &id_ticket);
-                getchar(); // Consumir o caractere de nova linha deixado pelo scanf
+                getchar();
                 printf("\n\t\t\t\t\tDigite a resolução: ");
                 fgets(resolucao, sizeof(resolucao), stdin);
-                resolucao[strcspn(resolucao, "\n")] = 0; // Remover o caractere de nova linha
+                resolucao[strcspn(resolucao, "\n")] = 0;
                 printf("\n\t\t\t\t\tDigite o status: ");
                 scanf("%49s", status);
                 printf("\n\t\t\t\t\tDigite o valor: ");
@@ -286,10 +362,11 @@ int main() {
                 } else {
                     printf("\n\t\t\t\t\tChamado alterado com sucesso.\n");
                 }
-                break;
-            case 4:
-               // Consultar Tickets
 
+                break;
+
+            case 4:
+                // Consultar Tickets
                 do {
                     if (consultarTickets(db) != SQLITE_OK) {
                         printf("\n\t\t\t\t\tErro ao consultar tickets.\n");
@@ -297,24 +374,26 @@ int main() {
                     printf("\n\t\t\t\t\tDigite 0 para voltar ao menu: ");
                     scanf("%d", &ticket);
                 } while (ticket != 0);
+                limpaTudo();
                 break;
 
             case 5:
-
                 // Consultar Status dos Chamados e Gerar Gráfico
-            do {
-                grafico_clientes();
-                graficoChamados(db);
-            printf("\n\n\t\t\tDigite 0 para voltar ao menu: ");
-            scanf("%d", &ticket);
-            } while (ticket != 0);
-                limpa();
+                do {
+                    grafico_clientes();
+                    graficoChamados(db);
+
+                    printf("\n\n\t\t\tDigite 0 para voltar ao menu: ");
+                    scanf("%d", &ticket);
+                } while (ticket != 0);
+
                 break;
 
             case 6:
                 saindo();
                 sqlite3_close(db);
                 return 0;
+
             default:
                 printf("Opção inválida. Tente novamente.\n");
         }
