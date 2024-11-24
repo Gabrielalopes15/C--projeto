@@ -1,92 +1,38 @@
-#include <stdio.h>      // Biblioteca padrão para entrada e saída
-#include <stdlib.h>     // Biblioteca para funções de alocação de memória e controle do sistema
-#include <string.h>     // Biblioteca para manipulação de strings
-#include <time.h>       // Biblioteca para manipulação de tempo
-#include <locale.h>     //Biblioteca para reconhecer pontuação em portugues.
-#include <ctype.h>      //Biblioteca para verificar os numeros e caracteres
+#include <stdio.h>
+#include <time.h>       // Biblioteca para manipula��o de tempo
 #include <windows.h>    //Biblioteca para mudar cor do texto
-#include <curl.curl.h>  //Biblioteca para enviar email
-#include "main.h"
+#include "main.h"       // Inclui as declara��es de fun��es
 
 
+// Defini��es
+#define LINHA "\t\t\t=========================================================================\n"
+#define TRACO "\t\t\t|----------------------------------------------------------------------|\n"
 
 
-//variaveis
-int senha; //Armazena a senha digitada pelo tecnico.
-int opcao_tecnica; //Armazena a opção solicitada no menu do tecnico.
-int ticket; //Armazena ticket do menu principal.
-
-
-//Funções
-
-//Função para mudar cor e fundo de texto.
+//Fun��o para mudar cor e fundo de texto.
 void setColor(int textColor, int bgColor) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, (bgColor << 4) | textColor);
 }
 
+
 //Imprime o nome da empresa e horas
-void imprime_cabec()
+void imprime_cabec(void)
 {
-        // Exibe o horário atual
+        // Exibe o hor�rio atual
     time_t tempo;
     time(&tempo);
     struct tm *tempo0 = localtime(&tempo);
+
     setColor(15, 1); // 1 = azul, 15 = fundo branco
-    printf("                                                                                             ______________________    \n");
-
-    printf("   ******************************                                                           | Horario atual: %02d:%02d |   \n", tempo0->tm_hour, tempo0->tm_min);
-    printf("   *         TICKETING          *                                                           |______________________|   \n");
-    printf("   ******************************                                                                                      \n");
-    printf("                                                                                                                       \n");
-    printf("______________________________________________________________________________________________________________________ \n");
-    setColor(7, 0); // Volta as cores ao padrão windows.
+    printf(LINHA);
+    printf("\t\t\t|  **********              Sistema de Ticketing             **********  |\n");
+    printf("\t\t\t|                          %02d:%02d                                        |\n", tempo0->tm_hour, tempo0->tm_min);
+    printf(LINHA);
+    setColor(7, 0); // Volta as cores ao padr�o windows.
     return;
 }
 
-
-//Imprime uma imagem de bem vindo
-void bemvindo()
-{
-    // Exibe uma mensagem de boas-vindas em arte de texto
-    setColor(1, 0); // 7 = cinza claro
-    printf("\n\t\t\t\tBBBB   EEEEE M   M      V   V  I  N   N DDDD   OOO  \n");
-    printf("\t\t\t\tB   B  E     MM MM      V   V  I  NN  N D   D O   O \n");
-    printf("\t\t\t\tBBBB   EEEE  M M M      V   V  I  N N N D   D O   O \n");
-    printf("\t\t\t\tB   B  E     M   M       V V   I  N  NN D   D O   O \n");
-    printf("\t\t\t\tBBBB   EEEEE M   M        V    I  N   N DDDD   OOO  \n\n");
-    printf("\n\t\t\t\t\t------- Bem vindo ao Ticketing  -------\n\n");
-    setColor(7, 0); // Volta as cores ao padrão windows.
-    return;
-}
-
-//Função para exibir tela de carregando.
-void carregando (){
-    int i;
-    for(i = 0; i < 2; i++){
-        setColor(9,0);
-        printf("\n\n\n\n\t\t\t _______________\n");
-        printf("\t\t\t| Carregando.   |\n");
-        printf("\t\t\t|_______________|\n");
-        sleep(1);
-        limpa();
-        setColor(9,0);
-        printf("\n\n\n\n\t\t\t _______________\n");
-        printf("\t\t\t| Carregando..  |\n");
-        printf("\t\t\t|_______________|\n");
-        sleep(1);
-        limpa();
-        setColor(9,0);
-        printf("\n\n\n\n\t\t\t _______________\n");
-        printf("\t\t\t| Carregando... |\n");
-        printf("\t\t\t|_______________|\n");
-        sleep(1);
-        limpa();
-        setColor(7,0);
-    }
-return;
-
-}
 
 //Limpa a tela.
 void limpa(void)
@@ -96,368 +42,135 @@ void limpa(void)
     return;
 }
 
-// Função para validar o telefone
-int validarTelefone(const char *telefone) {
-    int length = strlen(telefone);
 
-// Verifica se o comprimento está entre 10 e 11
-int validarTelefone(const char *telefone); {
-    int length = strlen(telefone);
-
-    // Verifica se o comprimento está entre 10 e 11
-    if (length < 10 || length > 11) {
-        return 0; // Telefone inválido
-    }
-
-    // Verifica se todos os caracteres são dígitos
-    for (int i = 0; i < length; i++) {
-        if (!isdigit(telefone[i])) {
-            return 0; // Telefone inválido
-        }
-    }
-}
-    return 1; // Telefone válido
-}
-
-int validarEmail(const char *email) {
-    regex_t regex;
-    int reti;
-
-    // Expressão regular para validar email
-    reti = regcomp(&regex, "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", REG_EXTENDED);
-    if (reti) {
-        fprintf(stderr, "Não foi possível compilar regex\n");
-        return 0;
-    }
-
-    // Executa a regex
-    reti = regexec(&regex, email, 0, NULL, 0);
-    regfree(&regex);
-
-    if (!reti) {
-        return 1; // Email válido
-    } else {
-        return 0; // Email inválido
-    }
-} 
-
-
-// Função para registrar um novo chamado
-void registrarChamado(Chamado* chamado, int id) {
-    chamado->id = id;   // Atribui o ID ao chamado
-
-    // Atribui o Status ao chamado como "ABERTO"
-    strncpy(chamado->status, "ABERTO", MAX_TAM);
-    chamado->resolucao = '\0'; // Inicializa a resolução como uma string vazia
-
-    printf("\n\n\tDigite o nome do cliente:\n\n\t ");
-    fgets(chamado->nome, MAX_TAM, stdin);   // Lê o nome do cliente
-    chamado->nome[strcspn(chamado->nome, "\n")] = '\0'; // Remove a nova linha gerada pelo `fgets`
-    limpa();
-
-    int telefoneValido = 0;
-    while (!telefoneValido) {
-        printf("\n\n\tDigite o telefone do cliente: exemplo: ddd nnnnnnnn\n\n\t ");
-        fgets(chamado->telefone, MAX_TAM, stdin);
-        chamado->telefone[strcspn(chamado->telefone, "\n")] = '\0';
-        limpa();
-
-        if (validarTelefone(chamado->telefone)) {
-            telefoneValido = 1;
-        } else {
-            printf("\n\n\tTelefone inválido. Por favor, insira um número de telefone válido.\n");
-        }
-    }
-
-    printf("\n\n\tDigite o texto do chamado:\n\n\t ");
-    fgets(chamado->texto, MAX_TAM, stdin);  // Lê a descrição do chamado
-    chamado->texto[strcspn(chamado->texto, "\n")] = '\0'; // Remove a nova linha
-    limpa();
-
-    int emailValido = 0;
-    while (!emailValido) {
-        printf("\n\n\tDigite o email do cliente:\n\n\t ");
-        fgets(chamado->email, MAX_TAM, stdin);
-        chamado->email[strcspn(chamado->email, "\n")] = '\0';
-        limpa();
-
-        if (validarEmail(chamado->email)) {
-            emailValido = 1;
-        } else {
-            printf("\n\n\tEmail inválido. Por favor, insira um email válido.\n");
-        }
-    }
-}
-
-size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp) {
-    Chamado *chamado = (Chamado *)userp;
-    static int sent = 0;
-
-    if (sent) {
-        return 0; // All data has been sent
-    }
-
-    // Formatar a mensagem com nome, telefone e texto do chamado
-    char mensagem[MAX_TAM * 3];
-    snprintf(mensagem, sizeof(mensagem), "Nome: %s\nTelefone: %s\nMensagem: %s\n",
-             chamado->nome, chamado->telefone, chamado->texto);
-
-    size_t len = strlen(mensagem);
-    memcpy(ptr, mensagem, len);
-    sent = 1;
-
-    return len;
-}
-
-void enviarEmail(Chamado *chamado) {
-    CURL *curl;
-    CURLcode res;
-    struct curl_slist *recipients = NULL;
-
-    curl = curl_easy_init();
-    if (curl) {
-        curl_easy_setopt(curl, CURLOPT_USERNAME, "gabylopes2000@gmail.com");
-        curl_easy_setopt(curl, CURLOPT_PASSWORD, "feas vmrv suyt npdj");
-        curl_easy_setopt(curl, CURLOPT_URL, "smtp://smtp.gmail.com:587");
-        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
-        curl_easy_setopt(curl, CURLOPT_MAIL_FROM, "<gabylopes2000@gmail.com>");
-
-        recipients = curl_slist_append(recipients, "<gabylopes2000@gmail.com>");
-        curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
-
-        curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
-        curl_easy_setopt(curl, CURLOPT_READDATA, chamado);
-        curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-
-        res = curl_easy_perform(curl);
-
-        if (res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        }
-
-        curl_slist_free_all(recipients);
-        curl_easy_cleanup(curl);
-    }
-}
-
-// Função para exibir as informações de um chamado
-void exibirChamado(const Chamado* chamado) {
-
-    printf("\a\n\t\t\t\t\tChamado Registrado:\n\n");
-    printf("\t\t ___________________________________________________________________________________________\n");
-    printf("\t\t| ID: %-80d      |    \n", chamado->id);          // Exibe o ID do chamado
-    printf("\t\t| Nome: %-80s    |    \n", chamado->nome);      // Exibe o nome do cliente
-    printf("\t\t| Telefone: %-80s|    \n", chamado->telefone);  // Exibe o telefone do cliente
-    printf("\t\t| Email: %-80s   |       \n", chamado->email);    // Exibe o email do cliente
-    printf("\t\t| Texto: %-80s   |       \n", chamado->texto);    // Exibe a descrição do chamado
-    printf("\t\t| Status:%-80s   |       \n", chamado->status);  // Exibe o status do chamado
-    printf("\t\t|___________________________________________________________________________________________|\n");
-    if (chamado->resolucao[0] != '\0') {      // Exibe a resolução se estiver presente
-        setColor(2,0);
-        printf("\t\t ___________________________________________________________________________________________\n");
-        printf("\n\n\t\t|Resolução: %-80s |\n", chamado->resolucao);
-        printf("\t\t|___________________________________________________________________________________________|\n");
-        setColor(7,0);
-    } else {
-        setColor(4,0);
-        printf("\t\t ___________________________________________________________________________________________\n");
-        printf("\t\t|Resolução: Nenhuma                                                                         |\n");
-        printf("\t\t|___________________________________________________________________________________________|\n");
-        setColor(7,0);
-    }
-}
-
-
-// Função para consultar um chamado pelo ID
-void consultarChamadoPorID(Chamado** chamados, int numChamados, int id) {
-    // Percorre a lista de chamados
-    for (int i = 0; i < numChamados; i++) {
-        if (chamados[i]->id == id) {    // Verifica se o ID corresponde
-            exibirChamado(chamados[i]); // Se encontrado, exibe o chamado
-            return;
-        }
-    }
-    // Se o ID não for encontrado, informa que o chamado não foi achado
-            setColor(4,0);
-        printf("\n\n\t\t ___________________________________________________________________________________________\n");
-            printf("\t\t|                          Chamado com ID %d não encontrado.                                |\n", id);
-            printf("\t\t|___________________________________________________________________________________________|\n");
-            setColor(7,0);
-}
-
-
-// Função para atualizar o status e a resolução de um chamado
-void atualizarChamado(Chamado** chamados, int numChamados, int id) {
-    // Percorre a lista de chamados
-    for (int i = 0; i < numChamados; i++) {
-        if (chamados[i]->id == id) {    // Verifica se o ID corresponde
-            printf("Chamado encontrado.\n");
-            printf("Digite o novo status (ex: 'FECHADO', 'PENDENTE'): ");
-            fgets(chamados[i]->status, MAX_TAM, stdin);
-            chamados[i]->status[strcspn(chamados[i]->status, "\n")] = '\0'; // Remove a nova linha
-
-            printf("Digite a resolução do chamado: ");
-            fgets(chamados[i]->resolucao, MAX_TAM, stdin);
-            chamados[i]->resolucao[strcspn(chamados[i]->resolucao, "\n")] = '\0'; // Remove a nova linha
-
-            printf("Chamado atualizado com sucesso.\n");
-            return;
-        }
-    }
-    // Se o ID não for encontrado, informa que o chamado não foi achado
-    setColor(4,0);
-        printf("\n\n\t\t ___________________________________________________________________________________________\n");
-            printf("\t\t|                          Chamado com ID %d não encontrado.                                |\n", id);
-            printf("\t\t|___________________________________________________________________________________________|\n");
-            setColor(7,0);
-}
-
-// Função para listar chamados por status
-void listarChamadosPorStatus(Chamado** chamados, int numChamados, const char* statusDesejado) {
-    int encontrado = 0;
-    for (int i = 0; i < numChamados; i++) {
-        if (strcmp(chamados[i]->status, statusDesejado) == 0) {
-            exibirChamado(chamados[i]);
-            encontrado = 1;
-        }
-    }
-    if (!encontrado) {
-        printf("Nenhum chamado com status '%s' encontrado.\n", statusDesejado);
-    }
-}
-
-//Valida se a senha do tecnico esta correta ou não.
-void login_tecnico(){
-    // Obter a data atual
-    time_t t = time(NULL);
-    struct tm tm = *localtime(&t);
-
-    int dia = tm.tm_mday;
-    int mes = tm.tm_mon + 1; // tm_mon retorna meses de 0 a 11
-    int ano = tm.tm_year % 100; // Obter os dois últimos dígitos do ano
-
-    int senha_correta = dia * mes * ano;
-
-    printf("Digite a senha para a área técnica: ");
-    scanf("%d", &senha);
-    if (senha == senha_correta) {
-        limpa();
-        menu_tecnico();
-    }else{
-        printf("Senha incorreta\n");
-
-    }
+//Imprime uma imagem de bem vindo
+void bemvindo()
+{
+    // Exibe uma mensagem de boas-vindas em arte de texto
+    setColor(9, 0); // azul claro
+    printf("\n\t\t\t\tBBBB   EEEEE M   M      V   V  I  N   N DDDD   OOO  \n");
+    printf("\t\t\t\tB   B  E     MM MM      V   V  I  NN  N D   D O   O \n");
+    printf("\t\t\t\tBBBB   EEEE  M M M      V   V  I  N N N D   D O   O \n");
+    printf("\t\t\t\tB   B  E     M   M       V V   I  N  NN D   D O   O \n");
+    printf("\t\t\t\tBBBB   EEEEE M   M        V    I  N   N DDDD   OOO  \n\n");
+    printf("\n\t\t\t\t\t------- Bem vindo ao Ticketing  -------\n\n");
+    setColor(7, 0); // Volta as cores ao padr�o windows.
+    printf("\n\t\t\t\t Feito por: Carlos - Gabriela - Lucas - Leticia \n\n");
     return;
 }
 
-//Imprime o menu do tecnico
-void menu_tecnico (void){
-  // Menu da área técnica
-        printf("\n\t\t\t----- Área Técnica -----\n");
-        printf("\t\t\tEscolha a opção desejada:\n");
-        printf("\t\t\t1. Consultar chamados ABERTOS\n");
-        printf("\t\t\t2. Consultar chamados FECHADOS\n");
-        printf("\t\t\t3. Atualizar chamado\n");
-        printf("\t\t\t4. Voltar ao menu principal\n");
-        scanf("%d", &opcao_tecnica);
-        return;
-}
 
-// Exibe o menu principal
-void imprime_menu(){
-
-        printf("\t\t\t\t\tEscolha a opcao desejada:\n");
-        printf("\t\t\t\t\t1-ABRIR TICKET\n");
-        printf("\t\t\t\t\t2-CONSULTAR TICKET POR ID\n");
-        printf("\t\t\t\t\t3-AREA TECNICA\n");
-        printf("\t\t\t\t\t4-SAIR\n\t\t\t\t\t");
-}
-
-//codigo fonte
-int main (){
-
-        setlocale(LC_ALL, "Portuguese");
-
-        Chamado** chamados = NULL;   // Ponteiro para um vetor de ponteiros de chamados
-        int numChamados = 0;         // Número de chamados registrados
-        int id = 1;                  // ID inicial para os chamados
-        int opcao, ticket, senha;    // Variáveis para armazenar a opção do menu, ticket e senha
-        char resposta[4];            // Resposta do usuário para continuar registrando chamados (sim/não)
-        int consultaID;              // Armazena o ID a ser consultado
-        char sair[3];
-
-        imprime_cabec();
-        bemvindo();
-
-    while (1) {
-        imprime_menu();
-        scanf("%d", &ticket);
-        getchar(); // Consumir o caractere de nova linha deixado pelo scanf
+//Fun��o para exibir tela de Saindo.
+void saindo (){
+    int i;
+    for(i = 0; i < 2; i++){
+        //setColor(9,15);
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Saindo.       |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
+        sleep(1);
         limpa();
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Saindo..      |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
+        sleep(1);
+        limpa();
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Saindo...     |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
+        sleep(1);
+        limpa();
+        setColor(7,0);
+    }
+exit(0);
 
-        switch (ticket) {
-            case 1:
-                // Loop para registrar chamados enquanto a resposta for "sim"
-                do {
-                    limpa();
+}
 
-                    // Realoca memória para armazenar um novo chamado
-                    chamados = (Chamado**)realloc(chamados, (numChamados + 1) * sizeof(Chamado*));
-                    if (chamados == NULL) {
-                        printf("Erro ao alocar memória.\n");
-                        limpa();
-                        exit(1);
-                    }
 
-                    // Aloca memória para o novo chamado
-                    chamados[numChamados] = (Chamado*)malloc(sizeof(Chamado));
-                    if (chamados[numChamados] == NULL) {
-                        printf("Erro ao alocar memória.\n");
-                        limpa();
-                        exit(1);
-                    }
+//Fun��o para exibir tela de carregando.
+void carregando (void){
+    int i;
+    for(i = 0; i < 1; i++){
+        limpa();
+        //setColor(9,15);
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Carregando.   |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
+        sleep(1);
+        limpa();
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Carregando..  |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
+        sleep(1);
+        limpa();
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Carregando... |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
+        sleep(1);
+        limpa();
+        setColor(7,0);
+    }
+return;
 
-                    // Registra o chamado
-                    registrarChamado(chamados[numChamados], id);
-                    // Exibe o chamado registrado
-                    limpa();
-                    carregando();
-                    exibirChamado(chamados[numChamados]);
+}
 
-                    numChamados++; // Incrementa o número de chamados registrados
-                    id++;          // Incrementa o ID do próximo chamado
 
-                    printf("\n\n\t\t\t\tDeseja abrir outro ticket? (sim/nao)\n\n\t\t\t\t");
-                    scanf("%s", sair);
-                } while (strcmp(sair, "sim") == 0);
-
-                limpa();
-                break;
-
-            case 2:
-                // Consulta chamado por ID
-                printf("\t\tDigite o ID do chamado a ser consultado:\n\t ");
-                scanf("%d", &consultaID);
-                getchar(); // Consumir nova linha
-                consultarChamadoPorID(chamados, numChamados, consultaID); // Chama a função para consultar
-                break;
-
-            case 3:
-                // Área técnica (implementar conforme necessário)
-                login_tecnico();
-                break;
-
-            case 4:
-                // Sair do programa
-                printf("Saindo...\n");
-                exit(0);
-                break;
-
-            default:
-                printf("Opção inválida.\n");
-                break;
-        }
+//Fun��o para criar grafico
+void grafico_clientes() {
+    int cont = countClientes();
+    if (cont < 0) {
+        printf("Erro ao obter o n�mero de clientes.\n");
+        return;
     }
 
+    printf("Gr�fico:\n");
+    printf("Total de clientes: ");
+    for (int i = 0; i < cont; i++) {
+        printf("\\");
+    }
+    printf("\nTotal de clientes: %d\n", cont);
+}
+
+
+
+int main() {
+    sqlite3 *db;
+
+    // Abre o banco de dados
+    if (abrirBanco(&db) != SQLITE_OK) {
+        return 1;
+    }
+
+    // Cria as tabelas, se n�o existirem
+    if (criarTabela(db) != SQLITE_OK) {
+        sqlite3_close(db);
+        return 1;
+    }
+
+    char nome[100], tel[20], cpf[20];
+
+    grafico_clientes();
+
+    // Conta o n�mero de clientes
+    countClientes();
+
+    // Captura os dados do usu�rio
+    printf("Digite o nome: ");
+    scanf("%99s", nome);
+    printf("Digite o telefone: ");
+    scanf("%19s", tel);
+    printf("Digite o CPF: ");
+    scanf("%19s", cpf);
+
+    // Tenta cadastrar o cliente
+    if (cadastrarCliente(db, nome, tel, cpf) != SQLITE_OK) {
+        sqlite3_close(db);
+        return 1;
+    }
+
+
+
+    // Fecha o banco de dados
+    sqlite3_close(db);
     return 0;
 }
