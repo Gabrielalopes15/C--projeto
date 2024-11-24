@@ -1,17 +1,15 @@
-#include <string.h>
 
-#define MAX_TAM 100
+#ifndef MAIN_H
+#define MAIN_H
 
+#include <sqlite3.h>
 
-// Defini√ß√£o de uma estrutura que representa um chamado
-typedef struct {
-    char valor[MAX_TAM];
-    int id;                // ID do chamado
-    char nome[80];     // Nome do cliente
-    char telefone[15]; // Telefone do cliente
-    char email[100];    // Email do cliente
-    char texto[MAX_TAM];    // Texto do chamado (a d√∫vida ou quest√£o do cliente)
-    char status[MAX_TAM];   // Status do chamado (ex.: "ABERTO", "PENDENTE" ,"FECHADO")
-    char resolucao[MAX_TAM]; // Resolu√ß√£o do chamado (se houver)
-    char cpf[MAX_TAM];
-} Chamado;
+// PrototipaÁ„o das funÁıes
+int abrirBanco(sqlite3 **db);
+int criarTabela(sqlite3 *db);
+int cpfExiste(sqlite3 *db, const char *cpf);
+int cadastrarCliente(sqlite3 *db, const char *nome, const char *tel, const char *cpf);
+int countClientes();
+
+#endif // MAIN_H
+
