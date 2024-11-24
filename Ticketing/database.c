@@ -20,7 +20,7 @@ int criarTabela(sqlite3 *db) {
         "ID_CLIENTE INTEGER PRIMARY KEY AUTOINCREMENT, "
         "NOME TEXT NOT NULL, "
         "TEL TEXT NOT NULL, "
-        "CPF TEXT NOT NULL);"
+        "CPF TEXT NOT NULL UNIQUE);"
 
         "CREATE TABLE IF NOT EXISTS TICKET ("
         "ID_TICKET INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -58,20 +58,18 @@ int cpfExiste(sqlite3 *db, const char *cpf) {
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "Erro ao preparar statement: %s\n", sqlite3_errmsg(db));
-        return -1;
+        return 0;
     }
     sqlite3_bind_text(stmt, 1, cpf, -1, SQLITE_STATIC);
 
     rc = sqlite3_step(stmt);
+    int count = 0;
     if (rc == SQLITE_ROW) {
-        int count = sqlite3_column_int(stmt, 0);
-        sqlite3_finalize(stmt);
-        return count > 0;
-    } else {
-        fprintf(stderr, "Erro ao executar query: %s\n", sqlite3_errmsg(db));
-        sqlite3_finalize(stmt);
-        return -1;
+        count = sqlite3_column_int(stmt, 0);
     }
+    sqlite3_finalize(stmt);
+
+    return count > 0;
 }
 
 
@@ -96,6 +94,8 @@ int cadastrarCliente(sqlite3 *db, const char *nome, const char *tel, const char 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
         fprintf(stderr, "Erro ao inserir dados: %s\n", sqlite3_errmsg(db));
+    } else {
+
     }
     sqlite3_finalize(stmt);
     return rc;
