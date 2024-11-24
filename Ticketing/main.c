@@ -1,288 +1,325 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include "main.h"
+#include <time.h>       // Biblioteca para manipulação de tempo
+#include <windows.h>    //Biblioteca para mudar cor do texto
+#include "main.h"       // Inclui as declarações de funções
+#include "database.h"
+#include <locale.h>     //Biblioteca para reconhecer pontuação em portugues.
 
-// Função para abrir o banco de dados
-int abrirBanco(sqlite3 **db) {
-    int rc = sqlite3_open("ticketing.db", db);
-    if (rc) {
-        fprintf(stderr, "Não foi possível abrir o banco de dados: %s\n", sqlite3_errmsg(*db));
-        return rc;
-    }
-    return SQLITE_OK;
+
+// Definições
+#define LINHA "\t\t\t=========================================================================\n"
+#define TRACO "\t\t\t|----------------------------------------------------------------------|\n"
+
+
+//Função para mudar cor e fundo de texto.
+void setColor(int textColor, int bgColor) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, (bgColor << 4) | textColor);
 }
 
 
-// Função para criar a tabela CLIENTE
-int criarTabela(sqlite3 *db) {
-    const char *sql =
-        "CREATE TABLE IF NOT EXISTS CLIENTE ("
-        "ID_CLIENTE INTEGER PRIMARY KEY AUTOINCREMENT, "
-        "NOME TEXT NOT NULL, "
-        "TEL TEXT NOT NULL, "
-        "CPF TEXT NOT NULL);"
+//Imprime o nome da empresa e horas
+void imprime_cabec(void)
+{
+        // Exibe o horário atual
+    time_t tempo;
+    time(&tempo);
+    struct tm *tempo0 = localtime(&tempo);
 
-        "CREATE TABLE IF NOT EXISTS TICKET ("
-        "ID_TICKET INTEGER PRIMARY KEY AUTOINCREMENT, "
-        "ID_CLIENTE INTEGER, "
-        "RELATO TEXT NOT NULL, "
-        "RESOLUCAO TEXT NOT NULL, "
-        "STATUS TEXT NOT NULL, "
-        "VALOR INTEGER, "
-        "FOREIGN KEY(ID_CLIENTE) REFERENCES CLIENTE(ID_CLIENTE));"
-
-        "CREATE TABLE IF NOT EXISTS TECNICO ("
-        "ID_TECNICO INTEGER PRIMARY KEY AUTOINCREMENT, "
-        "ID_TICKET INTEGER, "
-        "NOME TEXT NOT NULL, "
-        "TEL TEXT NOT NULL, "
-        "EMAIL TEXT NOT NULL, "
-        "SENHA TEXT NOT NULL, "
-        "FOREIGN KEY(ID_TICKET) REFERENCES TICKET(ID_TICKET));";
-
-    char *errMsg = 0;
-    int rc = sqlite3_exec(db, sql, 0, 0, &errMsg);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Erro ao criar tabela: %s\n", errMsg);
-        sqlite3_free(errMsg);
-        return rc;
-    }
-    return SQLITE_OK;
+    setColor(15, 1); // 1 = azul, 15 = fundo branco
+    printf(LINHA);
+    printf("\t\t\t|  **********              Sistema de Ticketing             **********  |\n");
+    printf("\t\t\t|                          %02d:%02d                                        |\n", tempo0->tm_hour, tempo0->tm_min);
+    printf(LINHA);
+    setColor(7, 0); // Volta as cores ao padrão windows.
+    return;
 }
 
 
-// Função para verificar se o CPF já existe
-int cpfExiste(sqlite3 *db, const char *cpf) {
-    const char *sql = "SELECT COUNT(*) FROM CLIENTE WHERE CPF = ?;";
-    sqlite3_stmt *stmt;
-    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Erro ao preparar statement: %s\n", sqlite3_errmsg(db));
-        return -1;
-    }
-    sqlite3_bind_text(stmt, 1, cpf, -1, SQLITE_STATIC);
+// Função para imprimir o menu
+void imprime_menu() {
+    printf("\n\t\t\t\t\t------- Menu Principal -------\n");
+    printf("\t\t\t\t\t1. Cadastrar Cliente\n");
+    printf("\t\t\t\t\t2. Cadastrar Ticket por CPF\n");
+    printf("\t\t\t\t\t3. Alterar Ticket\n");
+    printf("\t\t\t\t\t4. Consultar ticket\n");
+    printf("\t\t\t\t\t5. Dashboard\n");
+    printf("\t\t\t\t\t6. Sair\n");
+    printf("\t\t\t\t\t7. Sair\n");
+    printf("\t\t\t\t\tEscolha uma opção: ");
+}
 
-    rc = sqlite3_step(stmt);
-    if (rc == SQLITE_ROW) {
-        int count = sqlite3_column_int(stmt, 0);
-        sqlite3_finalize(stmt);
-        return count > 0;
-    } else {
-        fprintf(stderr, "Erro ao executar query: %s\n", sqlite3_errmsg(db));
-        sqlite3_finalize(stmt);
-        return -1;
+//Limpa a tela.
+void limpa(void)
+{
+    system("cls");
+    imprime_cabec();
+    return;
+}
+
+
+//Imprime uma imagem de bem vindo
+void bemvindo()
+{
+    // Exibe uma mensagem de boas-vindas em arte de texto
+    setColor(9, 0); // azul claro
+    printf("\n\t\t\t\tBBBB   EEEEE M   M      V   V  I  N   N DDDD   OOO  \n");
+    printf("\t\t\t\tB   B  E     MM MM      V   V  I  NN  N D   D O   O \n");
+    printf("\t\t\t\tBBBB   EEEE  M M M      V   V  I  N N N D   D O   O \n");
+    printf("\t\t\t\tB   B  E     M   M       V V   I  N  NN D   D O   O \n");
+    printf("\t\t\t\tBBBB   EEEEE M   M        V    I  N   N DDDD   OOO  \n\n");
+    printf("\n\t\t\t\t\t------- Bem vindo ao Ticketing  -------\n\n");
+    setColor(7, 0); // Volta as cores ao padrão windows.
+    setColor(13,0);  // 2 = azul claro
+    printf("\n\t\t\t\t Feito por: Carlos - Gabriela - Lucas - Leticia \n\n");
+    setColor(7, 0); // Volta as cores ao padrão windows.
+    return;
+}
+
+
+//Função para exibir tela de Saindo.
+void saindo (){
+    int i;
+    for(i = 0; i < 2; i++){
+        //setColor(9,15);
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Saindo.       |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
+        sleep(1);
+        limpa();
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Saindo..      |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
+        sleep(1);
+        limpa();
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Saindo...     |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
+        sleep(1);
+        limpa();
+        setColor(7,0);
+    }
+exit(0);
+
+}
+
+
+//Função para exibir tela de carregando.
+void carregando (void){
+    int i;
+    for(i = 0; i < 1; i++){
+        limpa();
+        //setColor(9,15);
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Carregando.   |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
+        sleep(1);
+        limpa();
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Carregando..  |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
+        sleep(1);
+        limpa();
+        printf("\n\n\t\t\t\t\t\t _______________\n");
+        printf("\t\t\t\t\t\t| Carregando... |\n");
+        printf("\t\t\t\t\t\t|_______________|\n");
+        sleep(1);
+        limpa();
+        setColor(7,0);
+    }
+return;
+
+}
+
+
+//Função para criar grafico
+void grafico_clientes() {
+    int cont = countClientes();
+    if (cont < 0) {
+        setColor(4,4);  // 4 = vermelho
+        printf("Erro ao obter o número de clientes.\n");
+        setColor(7, 0); // Volta as cores ao padrão windows.
+        return;
+    }
+    imprime_cabec();
+    printf("\n\t\t\tGráfico de clientes:\n");
+    printf("\n\n\t\t\tClientes Cadastrados: %d - ", cont);
+    for (int i = 0; i < cont; i++) {
+        setColor(15, 1); // 1 = azul, 15 = fundo branco
+        printf(" ");
+        setColor(7, 0); // Volta as cores ao padrão windows.
     }
 }
 
 
-// Função para cadastrar um cliente
-int cadastrarCliente(sqlite3 *db, const char *nome, const char *tel, const char *cpf) {
-    if (cpfExiste(db, cpf)) {
-        printf("CPF já cadastrado!\n");
-        return -1;
+void graficoChamados(sqlite3 *db) {
+    int abertos = 0, fechados = 0, pendentes = 0;
+
+    if (consultarStatusChamados(db, &abertos, &fechados, &pendentes) != SQLITE_OK) {
+        setColor(4,4);  // 4 = vermelho
+        printf("Erro ao obter os status dos chamados.\n");
+        setColor(7, 0); // Volta as cores ao padrão windows.
+        return;
     }
 
-    const char *sql = "INSERT INTO CLIENTE (NOME, TEL, CPF) VALUES (?, ?, ?);";
-    sqlite3_stmt *stmt;
-    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Erro ao preparar statement: %s\n", sqlite3_errmsg(db));
-        return rc;
+    printf("\n\n\n\n\t\t\tGráfico Tickets:\n");
+    printf("\n\n\t\t\tAbertos: %d - ", abertos);
+    for (int i = 0; i < abertos; i++) {
+        setColor(11, 11); // 11 = azul claro
+        printf(" ");
+        setColor(7, 0); // Volta as cores ao padrão windows.
     }
-    sqlite3_bind_text(stmt, 1, nome, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, tel, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, cpf, -1, SQLITE_STATIC);
+    printf("\n\n\t\t\tFechados:  %d - ", fechados);
+    for (int i = 0; i < fechados; i++) {
+        setColor(2, 2); // 1 = verde
+        printf(" ");
+        setColor(7, 0); // Volta as cores ao padrão windows.
+    }
 
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE) {
-        fprintf(stderr, "Erro ao inserir dados: %s\n", sqlite3_errmsg(db));
+    printf("\n\n\t\t\tPendentes: %d - ", pendentes);
+    for (int i = 0; i < pendentes; i++) {
+        setColor(4,4);  // 4 = vermelho
+        printf(" ");
+        setColor(7, 0); // Volta as cores ao padrão windows.
     }
-    sqlite3_finalize(stmt);
-    return rc;
+
 }
 
 
-int consultarStatusChamados(sqlite3 *db, int *abertos, int *fechados, int *pendentes) {
-    sqlite3_stmt *stmt;
-    const char *sql = "SELECT STATUS, COUNT(*) FROM TICKET GROUP BY STATUS";
-    int rc;
+int main() {
+    setlocale(LC_ALL, "Portuguese");
 
-    // Prepara a consulta SQL
-    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Erro ao preparar a consulta: %s\n", sqlite3_errmsg(db));
-        return rc;
+    sqlite3 *db;
+
+    // Variáveis
+    int ticket;
+    char cpf[20], nome[100], tel[20];
+    int id_cliente, id_ticket, valor;
+    char relato[256], resolucao[256], status[50];
+
+    // Abre o banco de dados
+    if (abrirBanco(&db) != SQLITE_OK) {
+        return 1;
     }
 
-    // Executa a consulta e obtém os resultados
-    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
-        const unsigned char *status = sqlite3_column_text(stmt, 0);
-        int count = sqlite3_column_int(stmt, 1);
+    // Cria as tabelas, se não existirem
+    if (criarTabela(db) != SQLITE_OK) {
+        sqlite3_close(db);
+        return 1;
+    }
 
-        if (strcmp((const char *)status, "Aberto") == 0) {
-            *abertos = count;
-        } else if (strcmp((const char *)status, "Fechado") == 0) {
-            *fechados = count;
-        } else if (strcmp((const char *)status, "Pendente") == 0) {
-            *pendentes = count;
+    bemvindo();
+    sleep(2);
+
+    while (1) {
+        printf("\n\n");
+        imprime_cabec();
+        imprime_menu();
+        printf("\n\t\t\t\t\t");
+        scanf("%d", &ticket);
+        getchar(); // Consumir o caractere de nova linha deixado pelo scanf
+        limpa();
+
+        switch (ticket) {
+            case 1:
+                 // Cadastrar Cliente
+
+                // Cadastrar Cliente
+                printf("\n\t\t\tDigite o nome: ");
+                fgets(nome, sizeof(nome), stdin);
+                nome[strcspn(nome, "\n")] = 0; // Remover o caractere de nova linha
+
+                printf("\n\t\t\tDigite o telefone: ");
+                fgets(tel, sizeof(tel), stdin);
+                tel[strcspn(tel, "\n")] = 0; // Remover o caractere de nova linha
+
+                printf("\n\t\t\tDigite o CPF: ");
+                fgets(cpf, sizeof(cpf), stdin);
+                cpf[strcspn(cpf, "\n")] = 0; // Remover o caractere de nova linha
+
+                if (cadastrarCliente(db, nome, tel, cpf) != SQLITE_OK) {
+                  setColor(2, 0);
+                   printf("\n\t\t\tCliente cadastrado com sucesso.\n");
+                   setColor(7, 0); // Volta as cores ao padrão windows.
+                } else {
+                     setColor(4, 0);  // 4 = vermelho
+                    printf("\n\t\t\tErro ao cadastrar cliente.\n");
+                    setColor(7, 0); // Volta as cores ao padrão windows.
+                }
+                break;
+                limpa();
+            case 2:
+                 // Consultar Cliente pelo CPF antes de Inserir Relato
+
+                printf("\n\t\t\t\t\tDigite o CPF do cliente: ");
+                scanf("%19s", cpf);
+
+                if (consultarClientePorCPF(db, cpf, &id_cliente) == SQLITE_OK) {
+                    printf("\n\t\t\t\t\tDigite o relato: ");
+                    getchar(); // Consumir o caractere de nova linha deixado pelo scanf
+                    fgets(relato, sizeof(relato), stdin);
+                    relato[strcspn(relato, "\n")] = 0; // Remover o caractere de nova linha
+
+                    if (inserirRelato(db, id_cliente, relato) != SQLITE_OK) {
+                        printf("\n\t\t\t\t\tErro ao inserir relato.\n");
+                    } else {
+                        printf("\n\t\t\t\t\tRelato inserido com sucesso.\n");
+                    }
+                }
+                break;
+            case 3:
+                // Alterar Chamado
+
+                printf("\n\t\t\t\t\tDigite o ID do ticket: ");
+                scanf("%d", &id_ticket);
+                getchar(); // Consumir o caractere de nova linha deixado pelo scanf
+                printf("\n\t\t\t\t\tDigite a resolução: ");
+                fgets(resolucao, sizeof(resolucao), stdin);
+                resolucao[strcspn(resolucao, "\n")] = 0; // Remover o caractere de nova linha
+                printf("\n\t\t\t\t\tDigite o status: ");
+                scanf("%49s", status);
+                printf("\n\t\t\t\t\tDigite o valor: ");
+                scanf("%d", &valor);
+
+                if (alterarChamado(db, id_ticket, resolucao, status, valor) != SQLITE_OK) {
+                    printf("\n\t\t\t\t\tErro ao alterar chamado.\n");
+                } else {
+                    printf("\n\t\t\t\t\tChamado alterado com sucesso.\n");
+                }
+                break;
+            case 4:
+               // Consultar Tickets
+
+                do {
+                    if (consultarTickets(db) != SQLITE_OK) {
+                        printf("\n\t\t\t\t\tErro ao consultar tickets.\n");
+                    }
+                    printf("\n\t\t\t\t\tDigite 0 para voltar ao menu: ");
+                    scanf("%d", &ticket);
+                } while (ticket != 0);
+                break;
+
+            case 5:
+
+                // Consultar Status dos Chamados e Gerar Gráfico
+            do {
+                grafico_clientes();
+                graficoChamados(db);
+            printf("\n\n\t\t\tDigite 0 para voltar ao menu: ");
+            scanf("%d", &ticket);
+            } while (ticket != 0);
+                limpa();
+                break;
+
+            case 6:
+                saindo();
+                sqlite3_close(db);
+                return 0;
+            default:
+                printf("Opção inválida. Tente novamente.\n");
         }
     }
 
-    // Finaliza a consulta
-    sqlite3_finalize(stmt);
-
-    return SQLITE_OK;
-}
-
-
-int countClientes() {
-    sqlite3 *db;
-    sqlite3_stmt *stmt;
-    const char *sql = "SELECT COUNT(*) FROM cliente";
-    int rc, count = 0;
-
-    // Abre a conexão com o banco de dados
-    rc = sqlite3_open("ticketing.db", &db);
-    if (rc) {
-        fprintf(stderr, "Não foi possível abrir o banco de dados: %s\n", sqlite3_errmsg(db));
-        return -1;
-    }
-
-    // Prepara a consulta SQL
-    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Erro ao preparar a consulta: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-        return -1;
-    }
-
-    // Executa a consulta e obtém o resultado
-    rc = sqlite3_step(stmt);
-    if (rc == SQLITE_ROW) {
-        count = sqlite3_column_int(stmt, 0);
-    } else {
-        fprintf(stderr, "Erro ao executar a consulta: %s\n", sqlite3_errmsg(db));
-    }
-
-    // Finaliza a consulta e fecha a conexão
-    sqlite3_finalize(stmt);
     sqlite3_close(db);
-
-    return count;
-}
-
-
-// Função para consultar um cliente por CPF
-int consultarClientePorCPF(sqlite3 *db, const char *cpf, int *id_cliente) {
-    char *errMsg = 0;
-    const char *sql = "SELECT ID_CLIENTE FROM CLIENTE WHERE CPF = ?;";
-    sqlite3_stmt *stmt;
-
-    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
-        return rc;
-    }
-
-    sqlite3_bind_text(stmt, 1, cpf, -1, SQLITE_STATIC);
-
-    rc = sqlite3_step(stmt);
-    if (rc == SQLITE_ROW) {
-        *id_cliente = sqlite3_column_int(stmt, 0);
-        sqlite3_finalize(stmt);
-        return SQLITE_OK;
-    } else {
-        printf("Cliente não encontrado.\n");
-        sqlite3_finalize(stmt);
-        return SQLITE_NOTFOUND;
-    }
-}
-
-// Função para alterar o cadastro de um cliente
-int alterarCliente(sqlite3 *db, const char *cpf, const char *novoNome, const char *novoTel) {
-    const char *sql = "UPDATE CLIENTE SET NOME = ?, TEL = ? WHERE CPF = ?;";
-    sqlite3_stmt *stmt;
-    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Erro ao preparar statement: %s\n", sqlite3_errmsg(db));
-        return rc;
-    }
-    sqlite3_bind_text(stmt, 1, novoNome, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, novoTel, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, cpf, -1, SQLITE_STATIC);
-
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE) {
-        fprintf(stderr, "Erro ao atualizar dados: %s\n", sqlite3_errmsg(db));
-    } else {
-        printf("Dados do cliente atualizados com sucesso.\n");
-    }
-    sqlite3_finalize(stmt);
-    return rc;
-}
-
-
-int inserirRelato(sqlite3 *db, int id_cliente, const char *relato) {
-    char *errMsg = 0;
-    char sql[512];
-    sprintf(sql, "INSERT INTO TICKET (ID_CLIENTE, RELATO, RESOLUCAO, STATUS) VALUES (%d, '%s', 'Pendente', 'Aberto');", id_cliente, relato);
-
-    int rc = sqlite3_exec(db, sql, 0, 0, &errMsg);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errMsg);
-        sqlite3_free(errMsg);
-        return rc;
-    } else {
-        printf("Relato inserido com sucesso\n");
-    }
-    return SQLITE_OK;
-}
-
-int alterarChamado(sqlite3 *db, int id_ticket, const char *resolucao, const char *status, int valor) {
-    char *errMsg = 0;
-    char sql[512];
-    sprintf(sql, "UPDATE TICKET SET RESOLUCAO = '%s', STATUS = '%s', VALOR = %d WHERE ID_TICKET = %d;", resolucao, status, valor, id_ticket);
-
-    int rc = sqlite3_exec(db, sql, 0, 0, &errMsg);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errMsg);
-        sqlite3_free(errMsg);
-        return rc;
-    } else {
-        printf("Chamado alterado com sucesso\n");
-    }
-    return SQLITE_OK;
-}
-
-
-int consultarTickets(sqlite3 *db) {
-    char *errMsg = 0;
-    const char *sql = "SELECT * FROM TICKET;";
-    sqlite3_stmt *stmt;
-
-    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
-        return rc;
-    }
-
-    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
-        int id_ticket = sqlite3_column_int(stmt, 0);
-        int id_cliente = sqlite3_column_int(stmt, 1);
-        const unsigned char *relato = sqlite3_column_text(stmt, 2);
-        const unsigned char *resolucao = sqlite3_column_text(stmt, 3);
-        const unsigned char *status = sqlite3_column_text(stmt, 4);
-        int valor = sqlite3_column_int(stmt, 5);
-
-        printf("ID_TICKET: %d\n", id_ticket);
-        printf("ID_CLIENTE: %d\n", id_cliente);
-        printf("RELATO: %s\n", relato);
-        printf("RESOLUCAO: %s\n", resolucao);
-        printf("STATUS: %s\n", status);
-        printf("VALOR: %d\n", valor);
-        printf("\n");
-    }
-
-    sqlite3_finalize(stmt);
-    return SQLITE_OK;
+    return 0;
 }
