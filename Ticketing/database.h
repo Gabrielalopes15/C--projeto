@@ -6,8 +6,8 @@
 // Prototipação das funções
 int abrirBanco(sqlite3 **db);
 int criarTabela(sqlite3 *db);
-int cpfExiste(sqlite3 *db, const char *cpf);
 int cadastrarCliente(sqlite3 *db, const char *nome, const char *tel, const char *cpf);
+int cpfExiste(sqlite3 *db, const char *cpf);
 int countClientes();
 int consultarCliente(sqlite3 *db, const char *cpf);
 int alterarCliente(sqlite3 *db, const char *cpf, const char *novoNome, const char *novoTel);
