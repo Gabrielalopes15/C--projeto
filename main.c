@@ -1,13 +1,13 @@
 #include <stdio.h>
-#include <time.h>       // Biblioteca para manipulação de tempo
+#include <time.h>       // Biblioteca para manipulaÃ§Ã£o de tempo
 #include <windows.h>    //Biblioteca para mudar cor do texto
-#include "main.h"       // Inclui as declarações de funções
+#include "main.h"       // Inclui as declaraÃ§Ãµes de funÃ§Ãµes
 #include "database.h"
-#include <locale.h>     //Biblioteca para reconhecer pontuação em portugues.
+#include <locale.h>     //Biblioteca para reconhecer pontuaÃ§Ã£o em portugues.
 
 
-// Definições
-// Função para centralizar o texto
+// DefiniÃ§Ãµes
+// FunÃ§Ã£o para centralizar o texto
 void centralizeText(const char *text) {
     int consoleWidth = getConsoleWidth();
     int padding = (consoleWidth - strlen(text)) / 2;
@@ -15,20 +15,20 @@ void centralizeText(const char *text) {
     printf("%s\n", text);
 }
 
-// Definições centralizadas
+// DefiniÃ§Ãµes centralizadas
 #define LINHA "=========================================================================             "
 #define TRACO "|----------------------------------------------------------------------                   |"
 
 
 
-// Função para definir a cor do texto
+// FunÃ§Ã£o para definir a cor do texto
 void setColor(int textColor, int bgColor) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, (bgColor << 4) | textColor);
 }
 
 
-// Função para obter a largura da tela do console
+// FunÃ§Ã£o para obter a largura da tela do console
 int getConsoleWidth() {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     int columns;
@@ -40,23 +40,23 @@ int getConsoleWidth() {
 }
 
 
-// Função para abrir o console em tela cheia
+// FunÃ§Ã£o para abrir o console em tela cheia
 void abrirTelaCheia() {
     HWND hwnd = GetConsoleWindow();
     ShowWindow(hwnd, SW_MAXIMIZE);
 }
 
 
-// Função para imprimir o cabeçalho centralizado
+// FunÃ§Ã£o para imprimir o cabeÃ§alho centralizado
 void imprime_cabec(void) {
 
-    // Exibe o horário atual
+    // Exibe o horÃ¡rio atual
     time_t tempo;
     time(&tempo);
     struct tm *tempo0 = localtime(&tempo);
 
     int consoleWidth = getConsoleWidth();
-    int padding = (consoleWidth - 70) / 2; // 70 é a largura do texto
+    int padding = (consoleWidth - 70) / 2; // 70 Ã© a largura do texto
 
     setColor(15, 13); // 1 = azul, 15 = fundo branco
     printf("\n\n");
@@ -68,12 +68,12 @@ void imprime_cabec(void) {
     printf("|                          %02d:%02d                                     |                                                \n", tempo0->tm_hour, tempo0->tm_min);
     for (int i = 0; i < padding; i++) printf(" ");
     printf("----------------------------------------------------------------------                                                \n");
-    setColor(7, 0); // Volta as cores ao padrão windows.
+    setColor(7, 0); // Volta as cores ao padrÃ£o windows.
     return;
 }
 
 
-// Função para imprimir o menu centralizado
+// FunÃ§Ã£o para imprimir o menu centralizado
 void imprime_menu() {
     int consoleWidth = getConsoleWidth();
     const char *menu_items[] = {
@@ -93,9 +93,9 @@ void imprime_menu() {
         printf("%s\n", menu_items[i]);
     }
 
-    int padding = (consoleWidth - strlen("Escolha uma opção: ")) / 2;
+    int padding = (consoleWidth - strlen("Escolha uma opÃ§Ã£o: ")) / 2;
     for (int j = 0; j < padding; j++) printf(" ");
-    printf("Escolha uma opção: ");
+    printf("Escolha uma opÃ§Ã£o: ");
 }
 
 //Limpa a tela.
@@ -115,7 +115,7 @@ void limpaTudo(void)
 }
 
 
-// Função para imprimir a mensagem de boas-vindas centralizada
+// FunÃ§Ã£o para imprimir a mensagem de boas-vindas centralizada
 void bemvindo() {
     int consoleWidth = getConsoleWidth();
     const char *welcome_message[] = {
@@ -135,7 +135,7 @@ void bemvindo() {
         for (int j = 0; j < padding; j++) printf(" ");
         printf("%s\n", welcome_message[i]);
     }
-    setColor(7, 0); // Volta as cores ao padrão windows.
+    setColor(7, 0); // Volta as cores ao padrÃ£o windows.
 
     setColor(13, 0); // rosa claro
     for (int i = 5; i < num_lines; i++) {
@@ -143,11 +143,11 @@ void bemvindo() {
         for (int j = 0; j < padding; j++) printf(" ");
         printf("%s\n", welcome_message[i]);
     }
-    setColor(7, 0); // Volta as cores ao padrão windows.
+    setColor(7, 0); // Volta as cores ao padrÃ£o windows.
 }
 
 
-//Função para exibir tela de Saindo.
+//FunÃ§Ã£o para exibir tela de Saindo.
 void saindo (){
     int i;
     for(i = 0; i < 2; i++){
@@ -174,7 +174,7 @@ exit(0);
 }
 
 
-// Função para exibir tela de carregando
+// FunÃ§Ã£o para exibir tela de carregando
 void carregando(void) {
     int i;
     for (i = 0; i < 1; i++) {
@@ -205,22 +205,22 @@ void carregando(void) {
 
 
 
-//Função para criar grafico
+//FunÃ§Ã£o para criar grafico
 void grafico_clientes() {
     int cont = countClientes();
     if (cont < 0) {
         setColor(4,4);  // 4 = vermelho
-        printf("Erro ao obter o número de clientes.\n");
-        setColor(7, 0); // Volta as cores ao padrão windows.
+        printf("Erro ao obter o nÃºmero de clientes.\n");
+        setColor(7, 0); // Volta as cores ao padrÃ£o windows.
         return;
     }
-    imprime_cabec();
-    printf("\n\t\t\tGráfico de clientes:\n");
+    
+    printf("\n\t\t\tGrÃ¡fico de clientes:\n");
     printf("\n\n\t\t\tClientes Cadastrados: %d - ", cont);
     for (int i = 0; i < cont; i++) {
         setColor(15, 1); // 1 = azul, 15 = fundo branco
         printf(" ");
-        setColor(7, 0); // Volta as cores ao padrão windows.
+        setColor(7, 0); // Volta as cores ao padrÃ£o windows.
     }
 }
 
@@ -231,29 +231,29 @@ void graficoChamados(sqlite3 *db) {
     if (consultarStatusChamados(db, &abertos, &fechados, &pendentes) != SQLITE_OK) {
         setColor(4,0);  // 4 = vermelho
         printf("Erro ao obter os status dos chamados.\n");
-        setColor(7, 0); // Volta as cores ao padrão windows.
+        setColor(7, 0); // Volta as cores ao padrÃ£o windows.
         return;
     }
 
-    printf("\n\n\n\n\t\t\tGráfico Tickets:\n");
+    printf("\n\n\n\n\t\t\tGrÃ¡fico Tickets:\n");
     printf("\n\n\t\t\tAbertos: %d - ", abertos);
     for (int i = 0; i < abertos; i++) {
         setColor(11, 11); // 11 = azul claro
         printf(" ");
-        setColor(7, 0); // Volta as cores ao padrão windows.
+        setColor(7, 0); // Volta as cores ao padrÃ£o windows.
     }
     printf("\n\n\t\t\tFechados:  %d - ", fechados);
     for (int i = 0; i < fechados; i++) {
         setColor(2, 2); // 1 = verde
         printf(" ");
-        setColor(7, 0); // Volta as cores ao padrão windows.
+        setColor(7, 0); // Volta as cores ao padrÃ£o windows.
     }
 
     printf("\n\n\t\t\tPendentes: %d - ", pendentes);
     for (int i = 0; i < pendentes; i++) {
         setColor(4,4);  // 4 = vermelho
         printf(" ");
-        setColor(7, 0); // Volta as cores ao padrão windows.
+        setColor(7, 0); // Volta as cores ao padrÃ£o windows.
     }
 
 }
@@ -349,7 +349,7 @@ int main() {
                 printf("\n\t\t\t\t\tDigite o ID do ticket: ");
                 scanf("%d", &id_ticket);
                 getchar();
-                printf("\n\t\t\t\t\tDigite a resolução: ");
+                printf("\n\t\t\t\t\tDigite a resoluÃ§Ã£o: ");
                 fgets(resolucao, sizeof(resolucao), stdin);
                 resolucao[strcspn(resolucao, "\n")] = 0;
                 printf("\n\t\t\t\t\tDigite o status: ");
@@ -378,7 +378,7 @@ int main() {
                 break;
 
             case 5:
-                // Consultar Status dos Chamados e Gerar Gráfico
+                // Consultar Status dos Chamados e Gerar GrÃ¡fico
                 do {
                     grafico_clientes();
                     graficoChamados(db);
@@ -395,7 +395,7 @@ int main() {
                 return 0;
 
             default:
-                printf("Opção inválida. Tente novamente.\n");
+                printf("OpÃ§Ã£o invÃ¡lida. Tente novamente.\n");
         }
     }
 
