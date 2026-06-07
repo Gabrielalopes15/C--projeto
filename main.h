@@ -1,19 +1,32 @@
-#include<string.h>
-#define MAX_TAM 100     // Define um tamanho mÃ¡ximo para os campos de texto
 
 #ifndef MAIN_H
 #define MAIN_H
 
-// DefiniÃ§Ã£o de uma estrutura que representa um chamado
+#include <sqlite3.h>
+
+// Definição da estrutura Chamado
 typedef struct {
-int id;                // ID do chamado
-char nome[80];     // Nome do cliente
-char telefone[15]; // Telefone do cliente
-char email[100];    // Email do cliente
-char texto[MAX_TAM];    // Texto do chamado (a dÃºvida ou questÃ£o do cliente)
-    char status[15];   // Status do chamado (ex.: "ABERTO", "PENDENTE" ,"FECHADO")
-char resolucao[MAX_TAM]; // ResoluÃ§Ã£o do chamado (se houver)
-    int senha; //senha do tecnico
+    int id;
+    char descricao[256];
+    char status[50];
+
+    // Adicione outros campos conforme necessário
 } Chamado;
+
+// Declarações de funções
+void setColor(int textColor, int bgColor);
+void imprime_cabec(void);
+void limpa(void);
+void bemvindo(void);
+void saindo(void);
+void carregando(void);
+void grafico_clientes(void);
+void imprime_menu(void);
+void registrarChamado(Chamado *chamado, int id);
+void exibirChamado(Chamado *chamado);
+void escolher_imprimir(void);
+void consultarChamadoPorID(Chamado **chamados, int numChamados, int consultaID);
+void login_tecnico(Chamado **chamados, int numChamados, int consultaID);
+void graficoChamados(sqlite3 *db);
 
 #endif // MAIN_H
